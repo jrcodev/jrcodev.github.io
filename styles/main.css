@@ -32,14 +32,13 @@
   margin: 0;
   padding: 0;
   border: 0;
-  display: flex;
-  flex-direction: row;
   font-family: "Inter", sans-serif;
   background-color: var(--primary-50);
 }
 
 .sidebar {
-  width: 256px;
+  position: fixed;
+  width: 280px;
   height: 100vh;
   padding: 12px;
   display: flex;
@@ -113,9 +112,8 @@ hr {
   width: 100%;
   border: 1px solid var(--primary-300);
   margin: 8px 0px;
-  opacity: .25;
+  opacity: 0.25;
 }
-
 
 .navbar-wrapper {
   display: flex;
@@ -144,7 +142,6 @@ hr {
   padding: 16px 32px;
 }
 
-
 .brand {
   height: 48px;
   position: relative;
@@ -160,9 +157,62 @@ hr {
   border: none;
   border-radius: 4px;
 }
-
+.image {
+  width: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+}
 .navbar-burger:hover {
   background-color: var(--primary-600);
+}
+
+.about-section {
+  text-align: justify;
+}
+
+.main-content {
+  padding: 16px 96px;
+}
+
+.main-wrapper {
+  margin-left: 280px;
+}
+
+.footer {
+  padding: 16px 32px;
+  background: var(--primary-800);
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.copyright {
+  margin-left: 8px;
+  color: var(--primary-100);
+  text-align: center;
+}
+
+blockquote {
+  background: var(--primary-100);
+  border-left: 10px solid var(--secondary-500);
+  margin: 1.5em 10px;
+  padding: 0.5em 10px;
+  text-align: left;
+  border-radius: 2px;
+  font-weight: 300;
+}
+
+blockquote:before {
+  color: var(--primary-700);
+  content: open-quote;
+  font-size: 3em;
+  line-height: 0.1em;
+  margin-right: 0.25em;
+  vertical-align: -0.4em;
+}
+
+blockquote p {
+  display: inline;
 }
 
 @media (max-width: 992px) {
@@ -170,14 +220,38 @@ hr {
     display: none;
   }
 
-  .navbar {
-    display: flex;
+  .main-wrapper {
+    margin-left: 0;
   }
 
   .content {
     display: block;
   }
-  .navbar-expand {
+  .navbar-expand,
+  .navbar {
     display: flex;
   }
+
+  .main-content {
+    padding: 16px 64px;
+  }
 }
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 16px 32px;
+  }
+}
+
+@media (max-width: 576px) {
+  .main-content {
+    padding: 16px 16px;
+  }
+
+  .footer {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+
