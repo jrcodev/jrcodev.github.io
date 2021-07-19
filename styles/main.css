@@ -157,9 +157,17 @@ hr {
   border: none;
   border-radius: 4px;
 }
+
+em {
+  font-family: monospace;
+  background: var(--primary-600);
+  padding: 1px 4px;
+  color: var(--primary-50);
+  border-radius: 4px;
+}
 .image {
   width: 100%;
-  border-radius: 8px;
+  border-radius: 4px;
   object-fit: cover;
 }
 .navbar-burger:hover {
@@ -171,7 +179,7 @@ hr {
 }
 
 .main-content {
-  padding: 16px 96px;
+  padding: 16px 128px;
 }
 
 .main-wrapper {
@@ -215,9 +223,97 @@ blockquote p {
   display: inline;
 }
 
+pre code {
+  font-size: 1rem;
+  border-radius: 4px;
+}
+
+#arrow-up {
+  display: none;
+  height: 32px;
+  width: 32px;
+  border-radius: 50%;
+  position: fixed;
+  bottom: 20px;
+  right: 30px;
+  z-index: 99;
+  border: none;
+  outline: none;
+  background: var(--secondary-500);
+  color: var(--primary-100);
+  cursor: pointer !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+#arrow-up:hover {
+  background: var(--secondary-600);
+}
+
+.arrow-up-wrapper {
+  display: none;
+}
+
+.article-metadata {
+  color: var(--primary-400);
+  font-size: 14px;
+  display: flex;
+}
+
+.article-metadata .time,
+.article-metadata .date {
+  display: flex;
+  align-items: center;
+}
+
+.article-metadata .time i,
+.article-metadata .date i {
+  margin-right: 4px;
+}
+
+.post {
+  display: flex;
+  flex-direction: row;
+}
+.post-title {
+  font-size: 18px;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--primary-700);
+}
+.post-description {
+  color: var(--primary-500);
+  font-size: 14px;
+}
+.read-more {
+  color: var(--secondary-700);
+}
+.post img {
+  margin: 0 8px;
+  border-radius: 4px;
+}
+
+.post-title:hover {
+  text-decoration: underline;
+}
+
+.article-metadata .time:after {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--primary-500);
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+
 @media (max-width: 992px) {
   .sidebar {
     display: none;
+  }
+
+  .arrow-up-wrapper {
+    display: block;
   }
 
   .main-wrapper {
@@ -248,10 +344,13 @@ blockquote p {
     padding: 16px 16px;
   }
 
+  .post {
+    flex-direction: column;
+    align-items: center;
+  }
+
   .footer {
     flex-direction: column;
     align-items: center;
   }
 }
-
-

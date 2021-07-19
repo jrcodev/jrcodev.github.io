@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="styles/main.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+      integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="styles/atom-one-dark.min.css" />
+    <title>@jrcodev/blog</title>
+  </head>
+  <body class="content">
+    <div class="sidebar-wrapper"></div>
+    <div class="navbar-wrapper"></div>
+    <main class="main-wrapper">
+      <article class="main-content">
+        <h1>MobX descomplicado sem codegen</h1>
+        <div class="article-metadata">
+          <div class="time">
+            <i class="fas fa-clock"></i>
+            <p>2 min</p>
+          </div>
+          <div class="date">
+            <i class="fas fa-calendar-alt"></i>
+            <p>19/07/2021</p>
+          </div>
+        </div>
+        <hr />
+        <p>
+          O Mobx é uma das bibliotecas mais utilizadas quando se trata de
+          gerência de estado. Ela apresenta conceitos essenciais chamados de
+          tríade. Esses conceitos são a base para entender qualquer código
+          escrito utilizando.
+        </p>
+        <p>
+          Neste artigo iremos utilizar plenamente o MobX sem depender do gerador
+          de código, graças ao Null Safety do Dart. Em um novo projeto novo
+          adicione as dependências no pubspec.yaml:
+        </p>
+        <pre><code>
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_mobx: ^2.0.0
+  mobx: ^2.0.1
+        </code></pre>
+        <img
+          src="/images/2021-07-19/mobx-triad-1024e4f4e0ff0ce3e27a2da8e36ab3a4.png"
+          alt="Mobx Tríade"
+          class="image"
+        />
+        <h2>Observables</h2>
+        <p>
+          São as entidades reativas da aplicação, podem ser valores simples ou
+          objetos mais complexos. Os observables definem o estado da aplicação e
+          a UI por sua vez consome esse estado de maneira reativa.
+        </p>
+        <pre><code class="language-dart">
+import 'package:mobx/mobx.dart';
+final counter = Observable(0);
+        </code></pre>
+        <p>
+          Para alterar o estado dos Observables utilizamos actions, elas são
+          funções que podem alterar diretamente o valor dos observables.
+        </p>
+        <h2>Actions</h2>
+        <p>Para definir actions imagine a seguinte classe:</p>
+        <pre><code class="language-dart">
+import 'package:mobx/mobx.dart';
+
+class CounterStore {
+    final counter = Observable(0);
+    late final addCounter = Action(
+        (int value) => counter.value += value,
+    );
+}
+        </code></pre>
+        <p>
+          A palavra-chave <em>late</em> nos permite usar o
+          <em>counter</em> mesmo na definição de addCounter, sem ocorrer o erro:
+          <em
+            >The instance member ‘counter’ can’t be accessed in an
+            initializer</em
+          >.
+        </p>
+        <h2>Computed</h2>
+        <p>
+          Os computeds oferecem um recurso para derivar o estado original. Com
+          ele podemos criar um novo estado a partir de outros facilmente:
+        </p>
+        <pre><code class="language-dart">
+import 'package:mobx/mobx.dart';
+
+class CounterStore {
+    final counter = Observable(0);
+    late final addCounter = Action(
+        (int value) => counter.value += value,
+    );
+
+    late final isEven = Computed&lt;bool&gt;(
+        () => counter.value.isEven,
+    );
+    late final isPositive = Computed&lt;bool&gt;(
+        () => counter.value > 0,
+    );
+    
+    final trivia = Observable("");
+
+    late final changeTrivia = Action(
+        (String newTrivia) => trivia.value = newTrivia,
+    );
+}
+        </code></pre>
+        <p>
+          Definir um <em>Computed</em> é muito simples utilizando a
+          palavra-chave <em>late</em>, os computeds são funções anônimas que
+          devem retornar algum valor e utilizar no mínimo um observable para
+          entrarem no sistema reativo.
+        </p>
+        <h2>Reactions</h2>
+        <p>
+          Reactions monitoram o sistema reativo e estão sempre observando as
+          mudanças nos <em>Observables</em>. Existem vários tipos de reactions,
+          nesse artigo utilizaremos a <em>autorun</em>. Iremos criar uma
+          reaction que a cada número irá realizar uma chamada para a api
+          <a href="http://numbersapi.com/">Numbers</a>:
+        </p>
+        <pre><code class="language-dart">
+class _MyHomePageState extends State&lt;MyHomePage&gt; {
+    late final ReactionDisposer _disposer;
+    final store = CounterStore();
+    
+    @override
+    void initState() {
+        _disposer = autorun((_) {
+        HttpClient()
+            .getUrl(
+                Uri.parse("http://numbersapi.com/${store.counter.value}"),
+            )
+            .then((req) => req.close())
+            .then((res) => res.transform(Utf8Decoder()))
+            .then((stream) async => store.changeTrivia([await stream.first]));
+        });
+        super.initState();
+    }
+    
+    @override
+    void dispose() {
+        _disposer();
+        super.dispose();
+    }
+    
+    @override
+    Widget build(BuildContext context) {
+        return Scaffold(...);
+    }
+        </code></pre>
+        <p>
+          Criar a reaction dentro do Widget possibilita usar o dispose quando a
+          mesma não for mais necessária. O <em>autorun</em> irá executar uma
+          request toda vez que o valor de <em>counter</em> mudar, após a
+          requisição ele irá alterar o valor de trivia. Observe a chamada para
+          <em>store.changeTrivia</em>, passamos o parâmetro dentro de uma lista,
+          essa é a maneira de se usar Actions sem <em>mobx_codegen</em>.
+        </p>
+        <h2>Consumindo o estado na UI</h2>
+        <p>
+          Para alterar e consumir o estado iremos fazer algumas mudanças no
+          código padrão, primeiro no <em>FloatingActionButton</em>:
+        </p>
+        <pre><code class="language-dart">
+floatingActionButton: FloatingActionButton(
+    onPressed: () => store.addCounter([5]),
+    tooltip: 'Increment',
+    child: Icon(Icons.add),
+),
+        </code></pre>
+        <p>
+          Toda vez que pressionarmos o FAB, <em>store.addCounter</em> será
+          chamada e irá adicionar 5 ao <em>counter</em> toda vez. Agora para
+          consumir as mudanças, basta utilizar o widget <em>Observer</em>:
+        </p>
+        <pre><code class="language-dart">
+body: Observer(
+    builder: (_) => Center(
+        child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: &lt;Widget&gt;[
+            Text(
+            '${store.counter.value}',
+            style: Theme.of(context).textTheme.headline4,
+            ),
+            Text(
+            store.trivia.value.isEmpty ? 'Sem trivia' : store.trivia.value,
+            textAlign: TextAlign.center,
+            ),
+        ],
+        ),
+    ),
+),
+        </code></pre>
+        <p>
+          Finalmente! Criamos um app simples com MobX, utilizando toda a tríade
+          sem precisar de geração de código.
+        </p>
+      </article>
+      <div class="footer-wrapper"></div>
+    </main>
+    <div class="arrow-up-wrapper"></div>
+    <script src="scripts/jquery-3.6.0.min.js"></script>
+    <script src="scripts/highlight.min.js"></script>
+    <script src="scripts/main.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+  </body>
+</html>
