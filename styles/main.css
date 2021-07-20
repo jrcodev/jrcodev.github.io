@@ -180,6 +180,7 @@ em {
 
 .main-content {
   padding: 16px 128px;
+  text-align: justify;
 }
 
 .main-wrapper {
@@ -273,6 +274,7 @@ pre code {
 .post {
   display: flex;
   flex-direction: row;
+  margin: 8px 0;
 }
 .post-title {
   font-size: 18px;
